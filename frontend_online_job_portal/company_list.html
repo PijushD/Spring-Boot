@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Companies Directory</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .search-container {
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .search-box {
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 50px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        outline: none;
+        transition: box-shadow 0.3s ease;
+      }
+
+      .search-box:focus {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .companies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+      }
+
+      .company-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .company-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .company-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 8px;
+      }
+
+      .company-info {
+        display: grid;
+        gap: 12px;
+      }
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #7f8c8d;
+        min-width: 80px;
+        font-size: 0.9rem;
+      }
+
+      .info-value {
+        color: #2c3e50;
+        font-size: 0.95rem;
+        word-break: break-word;
+      }
+
+      .info-value a {
+        color: #3498db;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .info-value a:hover {
+        color: #2980b9;
+        text-decoration: underline;
+      }
+
+      .icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+        opacity: 0.7;
+      }
+
+      .stats {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        margin-top: 30px;
+        backdrop-filter: blur(10px);
+      }
+
+      .stats h3 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+      }
+
+      .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #3498db;
+      }
+
+      @media (max-width: 768px) {
+        .companies-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .company-card {
+          padding: 20px;
+        }
+      }
+
+      .no-results {
+        text-align: center;
+        color: white;
+        font-size: 1.2rem;
+        margin: 50px 0;
+        display: none;
+      }
+
+      .loading {
+        text-align: center;
+        color: white;
+        font-size: 1.2rem;
+        margin: 50px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 4px solid white;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error-message {
+        background: rgba(255, 107, 107, 0.9);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🏢 Global Companies Directory</h1>
+        <p>Comprehensive database of leading companies worldwide</p>
+      </div>
+
+      <div class="search-container">
+        <input
+          type="text"
+          class="search-box"
+          placeholder="Search companies by name, location, or industry..."
+          id="searchInput"
+        />
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading companies...</p>
+      </div>
+
+      <div class="companies-grid" id="companiesGrid">
+        <!-- Companies will be loaded dynamically from API -->
+      </div>
+
+      <div class="no-results" id="noResults">
+        No companies found matching your search criteria.
+      </div>
+
+      <div class="error-message" id="errorMessage">
+        Failed to load companies. Please check if the API server is running on
+        http://localhost:8081/
+      </div>
+
+      <div class="stats">
+        <h3>Total Companies Listed</h3>
+        <div class="stats-number" id="totalCount">0</div>
+      </div>
+    </div>
+
+    <script>
+      const searchInput = document.getElementById("searchInput");
+      const companiesGrid = document.getElementById("companiesGrid");
+      const noResults = document.getElementById("noResults");
+      const totalCount = document.getElementById("totalCount");
+      const loading = document.getElementById("loading");
+      const errorMessage = document.getElementById("errorMessage");
+      let companiesData = [];
+
+      // API Configuration
+      const API_BASE_URL = "http://localhost:8080/company";
+      const API_ENDPOINT = "/getAllCompanies";
+
+      // Fetch companies from API
+      async function fetchCompanies() {
+        try {
+          showLoading(true);
+          const response = await fetch(`${API_BASE_URL}${API_ENDPOINT}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          companiesData = Array.isArray(data) ? data : data || [];
+
+          if (companiesData.length === 0) {
+            showError("No companies data received from API");
+            return;
+          }
+
+          renderCompanies(companiesData);
+          showLoading(false);
+        } catch (error) {
+          console.error("Error fetching companies:", error);
+          showError(`Failed to load companies: ${error.message}`);
+          showLoading(false);
+        }
+      }
+
+      // Show/hide loading spinner
+      function showLoading(show) {
+        loading.style.display = show ? "flex" : "none";
+        companiesGrid.style.display = show ? "none" : "grid";
+      }
+
+      // Show/hide error message
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+        companiesGrid.style.display = "none";
+      }
+
+      // Create company card HTML
+      function createCompanyCard(company) {
+        // Handle different possible field names from API
+        const name =
+          company.name ||
+          company.companyName ||
+          company.company_name ||
+          "Unknown Company";
+        const email =
+          company.email ||
+          company.emailAddress ||
+          company.email_address ||
+          "N/A";
+        const website =
+          company.website ||
+          company.websiteUrl ||
+          company.website_url ||
+          company.url ||
+          "#";
+        const contact =
+          company.contact ||
+          company.phone ||
+          company.phoneNumber ||
+          company.phone_number ||
+          "N/A";
+        const location =
+          company.location ||
+          company.address ||
+          company.city ||
+          company.country ||
+          "N/A";
+        const category =
+          company.category || company.industry || company.sector || "general";
+
+        return `
+                <div class="company-card" data-category="${category.toLowerCase()}">
+                    <div class="company-name">${name}</div>
+                    <div class="company-info">
+                        <div class="info-item">
+                            <span class="info-label">📧 Email:</span>
+                            <span class="info-value">
+                                ${
+                                  email !== "N/A"
+                                    ? `<a href="mailto:${email}">${email}</a>`
+                                    : email
+                                }
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">🌐 Website:</span>
+                            <span class="info-value">
+                                ${
+                                  website !== "#" && website !== "N/A"
+                                    ? `<a href="${
+                                        website.startsWith("http")
+                                          ? website
+                                          : "https://" + website
+                                      }" target="_blank">${website}</a>`
+                                    : "N/A"
+                                }
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">📞 Contact:</span>
+                            <span class="info-value">${contact}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">📍 Location:</span>
+                            <span class="info-value">${location}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Render companies to the grid
+      function renderCompanies(companies) {
+        companiesGrid.innerHTML = "";
+
+        if (!companies || companies.length === 0) {
+          showError("No companies to display");
+          return;
+        }
+
+        companies.forEach((company) => {
+          const cardHTML = createCompanyCard(company);
+          companiesGrid.insertAdjacentHTML("beforeend", cardHTML);
+        });
+
+        // Add hover effects to new cards
+        addHoverEffects();
+        updateTotalCount(companies.length);
+      }
+
+      // Add hover effects to company cards
+      function addHoverEffects() {
+        const companyCards = document.querySelectorAll(".company-card");
+        companyCards.forEach((card) => {
+          card.addEventListener("mouseenter", function () {
+            this.style.transform = "translateY(-5px) scale(1.02)";
+          });
+
+          card.addEventListener("mouseleave", function () {
+            this.style.transform = "translateY(0) scale(1)";
+          });
+        });
+      }
+
+      // Filter companies based on search input
+      function filterCompanies() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const companyCards = document.querySelectorAll(".company-card");
+        let visibleCount = 0;
+
+        companyCards.forEach((card) => {
+          const companyName = card
+            .querySelector(".company-name")
+            .textContent.toLowerCase();
+          const companyInfo = card
+            .querySelector(".company-info")
+            .textContent.toLowerCase();
+
+          const isVisible =
+            companyName.includes(searchTerm) ||
+            companyInfo.includes(searchTerm);
+
+          if (isVisible) {
+            card.style.display = "block";
+            visibleCount++;
+          } else {
+            card.style.display = "none";
+          }
+        });
+
+        if (
+          visibleCount === 0 &&
+          searchTerm !== "" &&
+          companiesData.length > 0
+        ) {
+          noResults.style.display = "block";
+          companiesGrid.style.display = "none";
+        } else {
+          noResults.style.display = "none";
+          companiesGrid.style.display = "grid";
+        }
+
+        updateTotalCount(visibleCount);
+      }
+
+      // Update total count display
+      function updateTotalCount(count) {
+        totalCount.textContent = count;
+      }
+
+      // Event listeners
+      searchInput.addEventListener("input", filterCompanies);
+
+      // Initialize the application
+      async function init() {
+        await fetchCompanies();
+      }
+
+      // Start the application when DOM is loaded
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
